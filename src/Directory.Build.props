@@ -3,7 +3,7 @@
   <PropertyGroup>
     <VersionMajor>1</VersionMajor>
     <VersionMinor>1</VersionMinor>
-    <VersionPatch>0</VersionPatch>
+    <VersionPatch>4</VersionPatch>
     <VersionQuality></VersionQuality>
     <!--<VersionQuality>20190816-1</VersionQuality>-->
     <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
@@ -33,7 +33,7 @@
     <OutputPath>$(MSBuildThisFileDirectory)/../output/$(Configuration)/</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <PackageReference Include="Microsoft.Net.Compilers" Version="2.*" Condition=" '$(OS)' == 'Windows_NT' ">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -43,6 +43,6 @@
     <PackageReference Include="IDisposableAnalyzers" Version="2.*">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

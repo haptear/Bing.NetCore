@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
+using AspectCore.Extensions.DependencyInjection;
 using Bing.AspNetCore;
 using Bing.AutoMapper;
 using Bing.Biz.Payments.Extensions;
@@ -149,8 +150,8 @@ namespace Bing.Samples.Api
             services.AddApiInterfaceService();
             //return services.AddBing();
             services.AddBing<AspNetCoreBingModuleManager>();
-            return services.BuildServiceProvider();
-            
+            //return services.BuildServiceProvider();
+            return services.BuildDynamicProxyServiceProvider();
         }
 
         /// <summary>
@@ -327,7 +328,7 @@ namespace Bing.Samples.Api
             ProjectName = "Bing.Samples.Api 在线文档调试",
             UseCustomIndex = true,
             RoutePrefix = "swagger",
-            ApiVersions = new List<string>() { "v1" },
+            ApiVersions = new List<Extensions.Swashbuckle.Configs.ApiVersion>() { new Extensions.Swashbuckle.Configs.ApiVersion() { Version = "v1"} },
             SwaggerAuthorizations = new List<CustomSwaggerAuthorization>()
             {
             },
