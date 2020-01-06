@@ -30,10 +30,36 @@ namespace Bing.Utils.Helpers
             if (value.IsEmpty())
             {
                 if (typeof(TEnum).IsGenericType)
-                    return default(TEnum);
+                    return default;
                 throw new ArgumentNullException(nameof(member));
             }
             return (TEnum)System.Enum.Parse(Common.GetType<TEnum>(), value, true);
+        }
+
+        #endregion
+
+        #region ParseByDescription(通过描述获取实例)
+
+        /// <summary>
+        /// 通过描述获取实例
+        /// </summary>
+        /// <typeparam name="TEnum">枚举类型</typeparam>
+        /// <param name="desc">描述</param>
+        public static TEnum ParseByDescription<TEnum>(string desc)
+        {
+            if (desc.IsEmpty())
+            {
+                if(typeof(TEnum).IsGenericType)
+                    return default;
+                throw new ArgumentNullException(nameof(desc));
+            }
+            var type = Common.GetType<TEnum>();
+            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.Default);
+            var fieldInfo =
+                fieldInfos.FirstOrDefault(p => p.GetCustomAttribute<DescriptionAttribute>(false)?.Description == desc);
+            if (fieldInfo == null)
+                throw new ArgumentNullException($"在枚举（{type.FullName}）中，未发现描述为“{desc}”的枚举项。");
+            return (TEnum)System.Enum.Parse(type, fieldInfo.Name);
         }
 
         #endregion
@@ -45,8 +71,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可，范例：Enum1枚举有成员A=0，则传入Enum1.A或0，获取成员名"A"</param>
-        public static string GetName<TEnum>(object member) where TEnum : struct =>
-            GetName(Common.GetType<TEnum>(), member);
+        public static string GetName<TEnum>(object member) => GetName(Common.GetType<TEnum>(), member);
 
         /// <summary>
         /// 获取成员名
@@ -91,7 +116,8 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可，范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
-        public static int GetValue<TEnum>(object member) where TEnum : struct => GetValue(Common.GetType<TEnum>(), member);
+        /// <exception cref="ArgumentNullException">成员为空</exception>
+        public static int GetValue<TEnum>(object member) => GetValue(Common.GetType<TEnum>(), member);
 
         /// <summary>
         /// 获取成员值
@@ -116,7 +142,7 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
         /// <param name="member">成员名、值、实例均可,范例:Enum1枚举有成员A=0,可传入"A"、0、Enum1.A，获取值0</param>
-        public static string GetDescription<TEnum>(object member) where TEnum : struct => Reflection.GetDescription<TEnum>(GetName<TEnum>(member));
+        public static string GetDescription<TEnum>(object member) => Reflection.GetDescription<TEnum>(GetName<TEnum>(member));
 
         /// <summary>
         /// 获取描述，使用<see cref="DescriptionAttribute"/>特性设置描述
@@ -133,7 +159,7 @@ namespace Bing.Utils.Helpers
         /// 获取描述项集合，文本设置为Description，值为Value
         /// </summary>
         /// <typeparam name="TEnum">枚举类型</typeparam>
-        public static List<Item> GetItems<TEnum>() where TEnum : struct => GetItems(typeof(TEnum));
+        public static List<Item> GetItems<TEnum>() => GetItems(typeof(TEnum));
 
         /// <summary>
         /// 获取描述项集合，文本设置为Description，值为Value
@@ -172,28 +198,6 @@ namespace Bing.Utils.Helpers
             var value = GetValue(type, field.Name);
             var description = Reflection.GetDescription(field);
             result.Add(new Item(description, value, value));
-        }
-
-        #endregion
-
-        #region GetEnumItemByDescription(获取指定描述信息的枚举项)
-
-        /// <summary>
-        /// 获取指定描述信息的枚举项
-        /// </summary>
-        /// <typeparam name="TEnum">枚举类型</typeparam>
-        /// <param name="desc">枚举项描述信息</param>
-        public static TEnum GetEnumItemByDescription<TEnum>(string desc) where TEnum : struct
-        {
-            if (desc.IsEmpty())
-                throw new ArgumentNullException(nameof(desc));
-            var type = typeof(TEnum);
-            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static);
-            var fieldInfo =
-                fieldInfos.FirstOrDefault(p => p.GetCustomAttribute<DescriptionAttribute>(false).Description == desc);
-            if (fieldInfo == null)
-                throw new ArgumentNullException($"在枚举（{type.FullName}）中，未发现描述为“{desc}”的枚举项。");
-            return (TEnum)System.Enum.Parse(type, fieldInfo.Name);
         }
 
         #endregion
@@ -255,5 +259,6 @@ namespace Bing.Utils.Helpers
         }
 
         #endregion
+
     }
 }

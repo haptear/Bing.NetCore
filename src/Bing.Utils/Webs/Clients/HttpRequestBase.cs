@@ -20,7 +20,7 @@ namespace Bing.Utils.Webs.Clients
     /// Http请求基类
     /// </summary>
     /// <typeparam name="TRequest">Http请求</typeparam>
-    public abstract class HttpRequestBase<TRequest> where TRequest:IRequest<TRequest>
+    public abstract class HttpRequestBase<TRequest> where TRequest : IRequest<TRequest>
     {
         #region 字段
 
@@ -125,11 +125,7 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 返回自身
         /// </summary>
-        /// <returns></returns>
-        private TRequest This()
-        {
-            return (TRequest) (object) this;
-        }
+        private TRequest This() => (TRequest)(object)this;
 
         #endregion
 
@@ -139,7 +135,6 @@ namespace Bing.Utils.Webs.Clients
         /// 设置字符编码
         /// </summary>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
         public TRequest Encoding(Encoding encoding)
         {
             _encoding = encoding;
@@ -150,11 +145,7 @@ namespace Bing.Utils.Webs.Clients
         /// 设置字符编码
         /// </summary>
         /// <param name="encoding">字符编码</param>
-        /// <returns></returns>
-        public TRequest Encoding(string encoding)
-        {
-            return Encoding(System.Text.Encoding.GetEncoding(encoding));
-        }
+        public TRequest Encoding(string encoding) => Encoding(System.Text.Encoding.GetEncoding(encoding));
 
         #endregion
 
@@ -164,17 +155,12 @@ namespace Bing.Utils.Webs.Clients
         /// 设置内容类型
         /// </summary>
         /// <param name="contentType">内容类型</param>
-        /// <returns></returns>
-        public TRequest ContentType(HttpContentType contentType)
-        {
-            return ContentType(contentType.Description());
-        }
+        public TRequest ContentType(HttpContentType contentType) => ContentType(contentType.Description());
 
         /// <summary>
         /// 设置内容类型
         /// </summary>
         /// <param name="contentType">内容类型</param>
-        /// <returns></returns>
         public TRequest ContentType(string contentType)
         {
             _contentType = contentType;
@@ -191,11 +177,7 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="name">名称</param>
         /// <param name="value">值</param>
         /// <param name="expiresDate">有效时间，单位：天</param>
-        /// <returns></returns>
-        public TRequest Cookie(string name, string value, double expiresDate)
-        {
-            return Cookie(name, value, null, null, DateTime.Now.AddDays(expiresDate));
-        }
+        public TRequest Cookie(string name, string value, double expiresDate) => Cookie(name, value, null, null, DateTime.Now.AddDays(expiresDate));
 
         /// <summary>
         /// 设置Cookie
@@ -203,11 +185,7 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="name">名称</param>
         /// <param name="value">值</param>
         /// <param name="expiresDate">到期时间</param>
-        /// <returns></returns>
-        public TRequest Cookie(string name, string value, DateTime expiresDate)
-        {
-            return Cookie(name, value, null, null, expiresDate);
-        }
+        public TRequest Cookie(string name, string value, DateTime expiresDate) => Cookie(name, value, null, null, expiresDate);
 
         /// <summary>
         /// 设置Cookie
@@ -217,18 +195,14 @@ namespace Bing.Utils.Webs.Clients
         /// <param name="path">源服务器URL子集</param>
         /// <param name="domain">所属域</param>
         /// <param name="expiresDate">到期时间</param>
-        /// <returns></returns>
         public TRequest Cookie(string name, string value, string path = "/", string domain = null,
-            DateTime? expiresDate = null)
-        {
-            return Cookie(new Cookie(name, value, path, domain) { Expires = expiresDate ?? DateTime.Now.AddYears(1) });
-        }
+            DateTime? expiresDate = null) =>
+            Cookie(new Cookie(name, value, path, domain) { Expires = expiresDate ?? DateTime.Now.AddYears(1) });
 
         /// <summary>
         /// 设置Cookie
         /// </summary>
         /// <param name="cookie">cookie</param>
-        /// <returns></returns>
         public TRequest Cookie(Cookie cookie)
         {
             _cookieContainer.Add(new Uri(_url), cookie);
@@ -242,11 +216,16 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 设置超时时间
         /// </summary>
+        /// <param name="timeout">超时时间。单位：秒</param>
+        public TRequest Timeout(int timeout) => Timeout(new TimeSpan(0, 0, 1));
+
+        /// <summary>
+        /// 设置超时时间
+        /// </summary>
         /// <param name="timeout">超时时间</param>
-        /// <returns></returns>
-        public TRequest Timeout(int timeout)
+        public TRequest Timeout(TimeSpan timeout)
         {
-            _timeout = new TimeSpan(0, 0, timeout);
+            _timeout = timeout;
             return This();
         }
 
@@ -260,7 +239,6 @@ namespace Bing.Utils.Webs.Clients
         /// <typeparam name="T">值类型</typeparam>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public TRequest Header<T>(string key, T value)
         {
             _headers.Add(key, value.SafeString());
@@ -275,7 +253,6 @@ namespace Bing.Utils.Webs.Clients
         /// 添加参数字典
         /// </summary>
         /// <param name="parameters">参数字典</param>
-        /// <returns></returns>
         public TRequest Data(IDictionary<string, object> parameters)
         {
             _params = parameters ?? throw new ArgumentNullException(nameof(parameters));
@@ -287,17 +264,12 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public TRequest Data(string key, object value)
         {
             if (string.IsNullOrWhiteSpace(key))
-            {
                 throw new ArgumentNullException(nameof(key));
-            }
             if (string.IsNullOrWhiteSpace(value.SafeString()))
-            {
                 return This();
-            }
             _params.Add(key, value);
             return This();
         }
@@ -307,7 +279,6 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         /// <typeparam name="T">实体类型</typeparam>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public TRequest JsonData<T>(T value)
         {
             ContentType(HttpContentType.Json);
@@ -319,7 +290,6 @@ namespace Bing.Utils.Webs.Clients
         /// 添加Xml参数
         /// </summary>
         /// <param name="value">值</param>
-        /// <returns></returns>
         public TRequest XmlData(string value)
         {
             ContentType(HttpContentType.Xml);
@@ -331,7 +301,6 @@ namespace Bing.Utils.Webs.Clients
         /// 添加文件参数
         /// </summary>
         /// <param name="filePath">文件路径</param>
-        /// <returns></returns>
         public TRequest FileData(string filePath)
         {
             return FileData("files", filePath);
@@ -342,7 +311,6 @@ namespace Bing.Utils.Webs.Clients
         /// </summary>
         /// <param name="name">参数名</param>
         /// <param name="filePath">文件路径</param>
-        /// <returns></returns>
         public TRequest FileData(string name, string filePath)
         {
             ContentType(HttpContentType.FormData);
@@ -358,7 +326,6 @@ namespace Bing.Utils.Webs.Clients
         /// 请求失败回调函数
         /// </summary>
         /// <param name="action">执行失败的回调函数，参数为响应结果</param>
-        /// <returns></returns>
         public TRequest OnFail(Action<string> action)
         {
             _failAction = action;
@@ -369,7 +336,6 @@ namespace Bing.Utils.Webs.Clients
         /// 请求失败回调函数
         /// </summary>
         /// <param name="action">执行失败的回调函数，第一个参数为响应结果，第二个参数为状态码</param>
-        /// <returns></returns>
         public TRequest OnFail(Action<string, HttpStatusCode> action)
         {
             _failStatusCodeAction = action;
@@ -383,7 +349,6 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 忽略Ssl
         /// </summary>
-        /// <returns></returns>
         public TRequest IgnoreSsl()
         {
             _serverCertificateCustomValidationCallback = (a, b, c, d) => true;
@@ -398,7 +363,6 @@ namespace Bing.Utils.Webs.Clients
         /// 设置Bearer令牌
         /// </summary>
         /// <param name="token">令牌</param>
-        /// <returns></returns>
         public TRequest BearerToken(string token)
         {
             _token = token;
@@ -412,7 +376,6 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 获取结果
         /// </summary>
-        /// <returns></returns>
         public async Task<string> ResultAsync()
         {
             SendBefore();
@@ -440,7 +403,6 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 发送请求
         /// </summary>
-        /// <returns></returns>
         protected async Task<HttpResponseMessage> SendAsync()
         {
             var client = CreateHttpClient();
@@ -451,7 +413,6 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 创建Http客户端
         /// </summary>
-        /// <returns></returns>
         protected virtual HttpClient CreateHttpClient()
         {
             return HttpClientBuilderFactory.CreateClient(_url, _timeout);
@@ -470,9 +431,7 @@ namespace Bing.Utils.Webs.Clients
         protected virtual void InitHttpClient(HttpClient client)
         {
             if (string.IsNullOrWhiteSpace(_token))
-            {
                 return;
-            }
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 
@@ -482,23 +441,20 @@ namespace Bing.Utils.Webs.Clients
         /// <returns></returns>
         protected virtual HttpRequestMessage CreateRequestMessage()
         {
-            var message=new HttpRequestMessage()
+            var message = new HttpRequestMessage()
             {
                 Method = _httpMethod,
                 RequestUri = new Uri(_url),
                 Content = CreateHttpContent()
             };
             foreach (var header in _headers)
-            {
                 message.Headers.Add(header.Key, header.Value);
-            }
             return message;
         }
 
         /// <summary>
         /// 创建请求内容
         /// </summary>
-        /// <returns></returns>
         private HttpContent CreateHttpContent()
         {
             var contentType = _contentType.SafeString().ToLower();
@@ -519,43 +475,29 @@ namespace Bing.Utils.Webs.Clients
         /// <summary>
         /// 创建Json内容
         /// </summary>
-        /// <returns></returns>
         private HttpContent CreateJsonContent()
         {
             if (string.IsNullOrWhiteSpace(_data))
-            {
                 _data = JsonHelper.ToJson(_params);
-            }
             return new StringContent(_data, _encoding, "application/json");
         }
 
         /// <summary>
         /// 创建Xml内容
         /// </summary>
-        /// <returns></returns>
-        private HttpContent CreateXmlContent()
-        {
-            return new StringContent(_data, _encoding, "text/xml");
-        }
+        private HttpContent CreateXmlContent() => new StringContent(_data, _encoding, "text/xml");
 
         /// <summary>
         /// 创建表单内容
         /// </summary>
-        /// <returns></returns>
         private HttpContent CreateMultipartFormDataContent()
         {
             var content =
                 new MultipartFormDataContent("Upload----" + DateTime.Now.ToString(CultureInfo.InvariantCulture));
             foreach (var file in _files)
-            {
                 content.Add(new StreamContent(file.GetFileStream()), file.GetName(), file.GetFileName());
-            }
-
             foreach (var item in _params)
-            {
                 content.Add(new StringContent(item.Value.SafeString()), item.Key);
-            }
-            
             return content;
         }
 
@@ -583,7 +525,6 @@ namespace Bing.Utils.Webs.Clients
         /// 获取内容类型
         /// </summary>
         /// <param name="response">Http响应消息</param>
-        /// <returns></returns>
         private string GetContentType(HttpResponseMessage response)
         {
             return response?.Content?.Headers?.ContentType == null

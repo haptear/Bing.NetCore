@@ -1,5 +1,7 @@
 ﻿using System;
 using AspectCore.Extensions.DependencyInjection;
+using Bing.AspNetCore;
+using Bing.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,8 +33,9 @@ namespace Bing.Samples
         /// </summary>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddApplication<AppModule>();
-            return services.BuildDynamicProxyServiceProvider();
+            services.AddBing<AspNetCoreBingModuleManager>();
+            return services.BuildServiceContextProvider();
+            //return services.BuildServiceProvider();
         }
 
         /// <summary>
@@ -40,7 +43,7 @@ namespace Bing.Samples
         /// </summary>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.InitializeApplication();
+            app.UseBing();
         }
     }
 }

@@ -2,7 +2,10 @@
 using System.Text;
 using Bing.AspNetCore;
 using Bing.AutoMapper;
+using Bing.Core;
+using Bing.Core.Modularity;
 using Bing.Datas.Dapper;
+using Bing.Datas.EntityFramework.MySql;
 using Bing.Datas.EntityFramework.SqlServer;
 using Bing.Datas.Enums;
 using Bing.Extensions.Swashbuckle.Configs;
@@ -10,11 +13,9 @@ using Bing.Extensions.Swashbuckle.Core;
 using Bing.Extensions.Swashbuckle.Extensions;
 using Bing.Extensions.Swashbuckle.Filters.Operations;
 using Bing.Logs.NLog;
-using Bing.Modularity;
 using Bing.Samples.Data;
-using Bing.Samples.EventHandlers;
-using Bing.Samples.Modules;
-using Bing.Samples.Service;
+using Bing.Samples.EventHandlers.Abstractions;
+using Bing.Samples.EventHandlers.Implements;
 using Bing.Webs.Extensions;
 using Bing.Webs.Filters;
 using Microsoft.AspNetCore.Builder;
@@ -28,18 +29,25 @@ namespace Bing.Samples
     /// <summary>
     /// 应用程序模块
     /// </summary>
-    [DependsOn(typeof(BingAspNetCoreModule), typeof(SamplesServiceModule), typeof(SamplesEventHandlerModule),typeof(MiniProfilerModule))]
-    public class AppModule : BingModule
+    [DependsOnModule(typeof(AspNetCoreModule))]
+    public class AppModule : AspNetCoreBingModule
     {
         /// <summary>
-        /// 配置服务集合
+        /// 模块级别。级别越小越先启动
         /// </summary>
-        /// <param name="context">配置服务上下文</param>
-        public override void ConfigureServices(ServiceConfigurationContext context)
+        public override ModuleLevel Level => ModuleLevel.Application;
+
+        /// <summary>
+        /// 添加服务。将模块服务添加到依赖注入服务容器中
+        /// </summary>
+        /// <param name="services">服务集合</param>
+        public override IServiceCollection AddServices(IServiceCollection services)
         {
-            var configuration = context.Services.GetConfiguration();
+            // 注册Swagger
+            services.AddSwaggerCustom(SwaggerOptions);
+
             // 注册Mvc
-            context.Services
+            services
                 .AddMvc(options =>
                 {
                     options.Filters.Add<ResultHandlerAttribute>();
@@ -51,34 +59,37 @@ namespace Bing.Samples
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();
-            // 注册Swagger
-            context.Services.AddSwaggerCustom(SwaggerOptions);
+
+
+            services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
 
             // 注册工作单元
-            context.Services.AddSqlServerUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(
-                configuration.GetConnectionString("DefaultConnection"));
+            services.AddSqlServerUnitOfWork<ISampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(
+                services.GetConfiguration().GetConnectionString("DefaultConnection"));
 
             // 注册SqlQuery
-            context.Services.AddSqlQuery<Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(options =>
+            services.AddSqlQuery<Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork, Bing.Samples.Data.UnitOfWorks.SqlServer.SampleUnitOfWork>(options =>
             {
                 options.DatabaseType = DatabaseType.SqlServer;
                 options.IsClearAfterExecution = true;
             });
+            // 注册SqlExecutor
+            services.AddSqlExecutor();
 
             // 注册日志
-            context.Services.AddNLog();
+            services.AddNLog();
 
             // 注册AutoMapper
-            context.Services.AddAutoMapper();
+            services.AddAutoMapper();
+            return services;
         }
 
         /// <summary>
-        /// 应用程序初始化
+        /// 应用AspNetCore的服务业务
         /// </summary>
-        /// <param name="context">应用程序初始化上下文</param>
-        public override void OnApplicationInitialization(ApplicationInitializationContext context)
+        /// <param name="app">应用程序构建器</param>
+        public override void UseModule(IApplicationBuilder app)
         {
-            var app = context.GetApplicationBuilder();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             app.UseErrorLog();
             app.UseStaticHttpContext();
@@ -88,6 +99,7 @@ namespace Bing.Samples
                 routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
+            Enabled = true;
         }
 
         /// <summary>

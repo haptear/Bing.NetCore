@@ -58,6 +58,7 @@ namespace Bing.Utils.Helpers
         #endregion
 
         #region GetDisplayName(获取类型显示名称)
+
         /// <summary>
         /// 获取类型显示名称，使用<see cref="DisplayNameAttribute"/>设置显示名称
         /// </summary>
@@ -308,7 +309,6 @@ namespace Bing.Utils.Helpers
         /// </summary>
         /// <typeparam name="TAttribute">泛型特性</typeparam>
         /// <param name="memberInfo">元数据</param>
-        /// <returns></returns>
         public static TAttribute GetAttribute<TAttribute>(MemberInfo memberInfo) where TAttribute : Attribute
         {
             return (TAttribute)memberInfo.GetCustomAttributes(typeof(TAttribute), false).FirstOrDefault();
