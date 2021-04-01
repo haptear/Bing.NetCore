@@ -1,5 +1,4 @@
-using Bing.Applications;
-using Bing.Admin.Data;
+﻿using Bing.Admin.Data;
 using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Commons;
 
@@ -8,7 +7,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 地区 服务
     /// </summary>
-    public class AreaService : ServiceBase, IAreaService
+    public class AreaService : Bing.Application.Services.AppServiceBase, IAreaService
     {
         /// <summary>
         /// 工作单元

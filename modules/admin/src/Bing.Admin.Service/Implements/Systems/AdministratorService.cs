@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Applications;
 using Bing.Admin.Data;
 using Bing.Admin.Domain.Shared;
 using Bing.Admin.Service.Abstractions.Systems;
-using Bing.Admin.Service.Requests.Systems;
-using Bing.Admin.Service.Requests.Systems.Extensions;
+using Bing.Admin.Service.Shared.Requests.Systems;
+using Bing.Admin.Service.Shared.Requests.Systems.Extensions;
+using Bing.Admin.Systems.Domain.Parameters;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
+using Bing.Mapping;
 
 namespace Bing.Admin.Service.Implements.Systems
 {
     /// <summary>
     /// 管理员 服务
     /// </summary>
-    public class AdministratorService : ServiceBase, IAdministratorService
+    public class AdministratorService : Bing.Application.Services.AppServiceBase, IAdministratorService
     {
         /// <summary>
         /// 工作单元
@@ -52,7 +53,8 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="request">请求</param>
         public async Task<Guid> CreateAsync(AdministratorCreateRequest request)
         {
-            var user = await AdministratorManager.CreateAsync(request.ToParameter());
+            //var user = await AdministratorManager.CreateAsync(request.ToParameter());
+            var user = await AdministratorManager.CreateAsync(request.MapTo<UserParameter>());
             await RoleManager.AddUserToRoleAsync(user.Id, RoleCode.Admin);
             await UnitOfWork.CommitAsync();
             return user.Id;

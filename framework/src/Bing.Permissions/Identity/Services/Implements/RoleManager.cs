@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Bing.Domains.Services;
+using Bing.Domain.Services;
 using Bing.Exceptions;
 using Bing.Extensions;
+using Bing;
 using Bing.Permissions.Identity.Extensions;
 using Bing.Permissions.Identity.Models;
 using Bing.Permissions.Identity.Repositories;
@@ -17,7 +18,8 @@ namespace Bing.Permissions.Identity.Services.Implements
     /// <typeparam name="TRole">角色类型</typeparam>
     /// <typeparam name="TKey">角色标识类型</typeparam>
     /// <typeparam name="TParentId">角色父标识类型</typeparam>
-    public abstract class RoleManager<TRole, TKey, TParentId> : DomainServiceBase, IRoleManager<TRole, TKey, TParentId> where TRole : RoleBase<TRole, TKey, TParentId>
+    public abstract class RoleManager<TRole, TKey, TParentId> : DomainServiceBase, IRoleManager<TRole, TKey, TParentId> 
+        where TRole : RoleBase<TRole, TKey, TParentId>
     {
         /// <summary>
         /// Identity角色管理

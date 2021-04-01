@@ -1,14 +1,13 @@
-﻿using Bing.Applications;
-using Bing.Datas.Sql;
-using Bing.Admin.Systems.Domain.Repositories;
+﻿using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
+using Bing.Data.Sql;
 
 namespace Bing.Admin.Service.Implements.Systems
 {
     /// <summary>
     /// 角色 查询服务
     /// </summary>
-    public class QueryRoleService : ServiceBase, IQueryRoleService
+    public class QueryRoleService : Bing.Application.Services.AppServiceBase, IQueryRoleService
     {
         /// <summary>
         /// Sql查询对象

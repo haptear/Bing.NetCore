@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Bing;
-using Bing.Utils;
-using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Auditing;
-using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Tenants;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Commons.Domain.Models
 {
@@ -17,7 +9,7 @@ namespace Bing.Admin.Commons.Domain.Models
     /// 文件
     /// </summary>
     [Display(Name = "文件")]
-    public partial class File : AggregateRoot<File>,ICreationAuditedWithNameObject
+    public partial class File : AggregateRoot<File>, ICreationAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="File"/>类型的实例

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -7,9 +7,8 @@ using Bing.Utils;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
-using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Tenants;
+using Bing.Data;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models
 {
@@ -17,7 +16,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 管理员
     /// </summary>
     [Display(Name = "管理员")]
-    public partial class Administrator : AggregateRoot<Administrator>,IDelete,IAuditedWithNameObject
+    public partial class Administrator : AggregateRoot<Administrator>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Administrator"/>类型的实例

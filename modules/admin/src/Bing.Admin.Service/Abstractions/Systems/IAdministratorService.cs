@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bing.Admin.Service.Requests.Systems;
-using Bing.Applications;
+using Bing.Admin.Service.Shared.Requests.Systems;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {
     /// <summary>
     /// 管理员 服务
     /// </summary>
-    public interface IAdministratorService : IService
+    public interface IAdministratorService : Bing.Application.Services.IAppService
     {
         /// <summary>
         /// 创建

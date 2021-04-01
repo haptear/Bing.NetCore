@@ -1,11 +1,10 @@
-using Bing.Applications;
-
+﻿
 namespace Bing.Admin.Service.Abstractions.Commons
 {
     /// <summary>
     /// 文件 查询服务
     /// </summary>
-    public interface IQueryFileService : IService
+    public interface IQueryFileService : Bing.Application.Services.IAppService
     {
     }
 }

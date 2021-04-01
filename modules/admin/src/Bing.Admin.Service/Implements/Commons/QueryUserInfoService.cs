@@ -1,14 +1,14 @@
-﻿using Bing.Applications;
-using Bing.Datas.Sql;
-using Bing.Admin.Commons.Domain.Repositories;
+﻿using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Commons;
+using Bing.Data;
+using Bing.Data.Sql;
 
 namespace Bing.Admin.Service.Implements.Commons
 {
     /// <summary>
     /// 用户信息 查询服务
     /// </summary>
-    public class QueryUserInfoService : ServiceBase, IQueryUserInfoService
+    public class QueryUserInfoService : Bing.Application.Services.AppServiceBase, IQueryUserInfoService
     {
         /// <summary>
         /// Sql查询对象

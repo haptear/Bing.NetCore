@@ -5,25 +5,25 @@ using Bing.Admin.Domain.Shared;
 using Bing.Admin.Domain.Shared.Results;
 using Bing.Admin.Infrastructure;
 using Bing.Admin.Service.Abstractions;
-using Bing.Admin.Service.Requests.Systems;
+using Bing.Admin.Service.Shared.Requests.Systems;
 using Bing.Admin.Systems.Domain.Events;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Systems.Domain.Services.Abstractions;
-using Bing.Applications;
 using Bing.Events.Messages;
 using Bing.Exceptions;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Permissions.Identity.JwtBearer;
 using Bing.Permissions.Identity.Results;
+using Bing.Security.Claims;
 
 namespace Bing.Admin.Service.Implements
 {
     /// <summary>
     /// 安全服务
     /// </summary>
-    public class SecurityService : ServiceBase, ISecurityService
+    public class SecurityService : Bing.Application.Services.AppServiceBase, ISecurityService
     {
         /// <summary>
         /// 初始化一个<see cref="SecurityService"/>类型的实例
@@ -91,6 +91,14 @@ namespace Bing.Admin.Service.Implements
                 return new SignInWithTokenResult {Message = "用户名不存在", State = SignInState.Failed};
             await AddClaimsToUserAsync(user, ApplicationCode.Admin);
             var result = await SignInManager.SignInAsync(user, request.Password);
+            user.AddLoginLog(Web.IP,Web.Browser);
+            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
+            {
+                UserId = user.Id,
+                Name = user.Nickname,
+                Ip = Web.IP,
+                UserAgent = Web.Browser
+            },false));
             await UnitOfWork.CommitAsync();
             return await GetLoginResultAsync(user, result, ApplicationCode.Admin);
         }
@@ -123,9 +131,13 @@ namespace Bing.Admin.Service.Implements
             var application = await ApplicationRepository.GetByCodeAsync(applicationCode);
             if (application == null)
                 throw new Warning("无效应用程序");
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationId, application.Id.SafeString());
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationCode, applicationCode);
-            user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationName, application.Name);
+            //user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationId, application.Id.SafeString());
+            //user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationCode, applicationCode);
+            //user.AddClaim(Bing.Security.Claims.ClaimTypes.ApplicationName, application.Name);
+            //user.AddClaim(JwtClaimTypes.ClientId, application.Id.SafeString());
+            user.AddClaim(BingClaimTypes.ApplicationId, application.Id.SafeString());
+            user.AddClaim(BingClaimTypes.ApplicationCode, applicationCode);
+            user.AddClaim(BingClaimTypes.ApplicationName, application.Name);
             user.AddClaim(JwtClaimTypes.ClientId, application.Id.SafeString());
         }
 
@@ -154,13 +166,13 @@ namespace Bing.Admin.Service.Implements
         {
             if (signInResult.State == SignInState.Failed)
                 return new SignInWithTokenResult { UserId = signInResult.UserId, State = signInResult.State, Message = signInResult.Message };
-            await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage()
-            {
-                UserId = user.Id,
-                Name = user.Nickname,
-                Ip = Web.IP,
-                UserAgent = Web.Browser
-            }));
+            //await MessageEventBus.PublishAsync(new UserLoginMessageEvent(new UserLoginMessage
+            //{
+            //    UserId = user.Id,
+            //    Name = user.Nickname,
+            //    Ip = Web.IP,
+            //    UserAgent = Web.Browser
+            //}));
             var result = await TokenBuilder.CreateAsync(user.GetClaims().ToDictionary(x => x.Type, x => x.Value));
             return new SignInWithTokenResult
             {

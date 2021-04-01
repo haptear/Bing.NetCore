@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
 using Bing.Admin.Data;
 using Bing.Core.Modularity;
-using Bing.Datas.Configs;
+using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Datas.Dapper;
 using Bing.Datas.EntityFramework.MySql;
-using Bing.Datas.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,14 +36,22 @@ namespace Bing.Admin.Modules
             var configuration = services.GetConfiguration();
             var connectionStr = configuration.GetConnectionString("DefaultConnection");
             // 注册工作单元
-            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(connectionStr);
+            services.AddMySqlUnitOfWork<IAdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(
+                connectionStr);
+            //services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr, DataLogLevel.All);
             // 注册SqlQuery
+            //services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
+            //    {
+            //        options.DatabaseType = DatabaseType.MySql;
+            //        options.IsClearAfterExecution = true;
+            //        //options.LogLevel = DataLogLevel.Off;
+            //    });
             services.AddSqlQuery<Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminUnitOfWork>(options =>
-                {
-                    options.DatabaseType = DatabaseType.MySql;
-                    options.IsClearAfterExecution = true;
-                    //options.LogLevel = DataLogLevel.Off;
-                });
+            {
+                options.DatabaseType = DatabaseType.MySql;
+                options.IsClearAfterExecution = true;
+                //options.LogLevel = DataLogLevel.Off;
+            });
             // 注册SqlExecutor
             services.AddSqlExecutor();
             return services;

@@ -31,9 +31,8 @@ namespace Bing.Admin
         /// <summary>
         /// 配置服务
         /// </summary>
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddBing<AspNetCoreBingModuleManager>();
             services.AddBing()
                 .AddModule<LogModule>()
                 .AddModule<MapperModule>()
@@ -44,7 +43,7 @@ namespace Bing.Admin
                 .AddModule<CapModule>()
                 //.AddModule<MySqlAdminUnitOfWorkMigrationModule>()
                 .AddModule<SwaggerModule>();
-            return services.BuildServiceContextProvider();
+            //return services.BuildServiceContextProvider();
         }
 
         /// <summary>

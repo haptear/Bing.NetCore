@@ -1,5 +1,4 @@
-﻿using Bing.Applications;
-using Bing.Admin.Data;
+﻿using Bing.Admin.Data;
 using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Commons;
 
@@ -8,7 +7,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 文件 服务
     /// </summary>
-    public class FileService : ServiceBase, IFileService
+    public class FileService : Bing.Application.Services.AppServiceBase, IFileService
     {
         /// <summary>
         /// 工作单元

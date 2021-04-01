@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Bing.Admin.Infrastructure.Encryptor;
+using Bing.Admin.Systems.Domain.DomainEvents;
 using Bing.Extensions;
+using Bing.Security.Claims;
 using Bing.Security.Encryptors;
 
 namespace Bing.Admin.Systems.Domain.Models
@@ -53,16 +55,32 @@ namespace Bing.Admin.Systems.Domain.Models
         /// </summary>
         public void AddUserClaims()
         {
-            AddClaim(IdentityModel.JwtClaimTypes.Subject, Id.ToString());
-            AddClaim(IdentityModel.JwtClaimTypes.Name, UserName);
-            AddClaim(Bing.Security.Claims.ClaimTypes.FullName, Nickname);
-            AddClaim(Bing.Security.Claims.ClaimTypes.Mobile, PhoneNumber);
-            AddClaim(Bing.Security.Claims.ClaimTypes.Email, Email);
+            //AddClaim(IdentityModel.JwtClaimTypes.Subject, Id.ToString());
+            //AddClaim(IdentityModel.JwtClaimTypes.Name, UserName);
+            //AddClaim(Bing.Security.Claims.ClaimTypes.FullName, Nickname);
+            //AddClaim(Bing.Security.Claims.ClaimTypes.Mobile, PhoneNumber);
+            //AddClaim(Bing.Security.Claims.ClaimTypes.Email, Email);
+
+            AddClaim(BingClaimTypes.UserId, Id.ToString());
+            AddClaim(BingClaimTypes.UserName, UserName);
+            AddClaim(BingClaimTypes.FullName, Nickname);
+            AddClaim(BingClaimTypes.PhoneNumber, PhoneNumber);
+            AddClaim(BingClaimTypes.Email, Email);
         }
 
         /// <summary>
         /// 获取加密器
         /// </summary>
         protected override IEncryptor GetEncryptor() => AesEncryptor.Instance;
+
+        /// <summary>
+        /// 添加登录日志
+        /// </summary>
+        /// <param name="ip">IP地址</param>
+        /// <param name="userAgent">用户代理</param>
+        public void AddLoginLog(string ip, string userAgent)
+        {
+            AddDomainEvent(new UserLoginDomainEvent(this, ip, userAgent));
+        }
     }
 }

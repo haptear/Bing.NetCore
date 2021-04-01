@@ -6,14 +6,15 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Bing.Data;
+using Bing.Data.Queries;
+using Bing.Data.Sql;
 using Bing.Datas.EntityFramework.Extensions;
-using Bing.Datas.Sql;
-using Bing.Datas.Stores;
-using Bing.Datas.UnitOfWorks;
-using Bing.Domains.Entities;
-using Bing.Domains.Repositories;
+using Bing.DependencyInjection;
+using Bing.Domain.Entities;
 using Bing.Extensions;
 using Bing.Helpers;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Datas.EntityFramework.Core
@@ -68,7 +69,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// </summary>
         protected virtual ISqlQuery CreateSqlQuery()
         {
-            var result = Ioc.Create<ISqlQuery>();
+            var result = ServiceLocator.Instance.GetService<ISqlQuery>();
             result.SetConnection(Connection);
             return result;
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -7,9 +7,8 @@ using Bing.Utils;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Auditing;
-using Bing.Domains;
-using Bing.Domains.Entities;
-using Bing.Domains.Entities.Tenants;
+using Bing.Data;
+using Bing.Domain.Entities;
 
 namespace Bing.Admin.Systems.Domain.Models
 {
@@ -17,7 +16,7 @@ namespace Bing.Admin.Systems.Domain.Models
     /// 权限
     /// </summary>
     [Display(Name = "权限")]
-    public partial class Permission : AggregateRoot<Permission>,IDelete,IAuditedWithNameObject
+    public partial class Permission : AggregateRoot<Permission>,ISoftDelete, IAuditedObjectWithName
     {
         /// <summary>
         /// 初始化一个<see cref="Permission"/>类型的实例
@@ -34,13 +33,15 @@ namespace Bing.Admin.Systems.Domain.Models
         /// 角色标识
         ///</summary>
         [Display(Name = "角色标识")]
-        public Guid? RoleId { get; set; }
+        [Required(ErrorMessage = "角色标识不能为空")]
+        public Guid RoleId { get; set; }
     
         /// <summary>
         /// 资源标识
         ///</summary>
         [Display(Name = "资源标识")]
-        public Guid? ResourceId { get; set; }
+        [Required(ErrorMessage = "资源标识不能为空")]
+        public Guid ResourceId { get; set; }
     
         /// <summary>
         /// 拒绝

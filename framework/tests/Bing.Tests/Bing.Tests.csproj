@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.2;netcoreapp3.1;</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Castle.Core" Version="4.4.0" />
+    <PackageReference Update="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
+    <PackageReference Update="MessagePack" Version="1.7.3.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\tests\Bing.Tests.Samples\Bing.Tests.Samples.csproj" />
+    <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+    <ProjectReference Include="..\..\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Emailing\Bing.Emailing.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
+    <ProjectReference Include="..\..\src\Bing\Bing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
+    <PackageReference Include="EasyCaching.InMemory" Version="0.6.1" />
+    <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+    <PackageReference Update="Microsoft.Net.Compilers" Version="3.3.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.1.0" />
+  </ItemGroup>
+
+</Project>

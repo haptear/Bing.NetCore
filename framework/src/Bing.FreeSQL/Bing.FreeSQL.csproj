@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="Bing.FreeSQL._shared.props" />
+
+  <Import Project="..\..\..\framework.props" />
+
+</Project>

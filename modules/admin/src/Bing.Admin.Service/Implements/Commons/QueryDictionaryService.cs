@@ -1,14 +1,13 @@
-﻿using Bing.Applications;
-using Bing.Datas.Sql;
-using Bing.Admin.Commons.Domain.Repositories;
+﻿using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Commons;
+using Bing.Data.Sql;
 
 namespace Bing.Admin.Service.Implements.Commons
 {
     /// <summary>
     /// 字典 查询服务
     /// </summary>
-    public class QueryDictionaryService : ServiceBase, IQueryDictionaryService
+    public class QueryDictionaryService : Bing.Application.Services.AppServiceBase, IQueryDictionaryService
     {
         /// <summary>
         /// Sql查询对象

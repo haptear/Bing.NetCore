@@ -1,7 +1,7 @@
 ﻿using Bing.Logs.Abstractions;
 using Bing.Logs.Core;
 using Bing.Logs.Formats;
-using Bing.Sessions;
+using Bing.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -19,7 +19,7 @@ namespace Bing.Logs.NLog
         /// <param name="name">服务名称</param>
         public static void AddNLog(this IServiceCollection services, string name = null)
         {
-            services.TryAddScoped<ILogProviderFactory, Bing.Logs.NLog.LogProviderFactory>();
+            services.TryAddSingleton<ILogProviderFactory, Bing.Logs.NLog.LogProviderFactory>();
             services.TryAddSingleton<ILogFormat, ContentFormat>();
             services.TryAddScoped<ILogContext, Bing.Logs.Core.LogContext>();
             services.TryAddScoped<ILog, Log>();
@@ -40,8 +40,8 @@ namespace Bing.Logs.NLog
                 var format = x.GetService<ILogFormat>();
                 var provider = new LogProviderFactory().Create(name, format);
                 var context = x.GetService<ILogContext>();
-                var session = x.GetService<ISession>();
-                return new Log(name, provider, context, session, "");
+                var currentUser = x.GetService<ICurrentUser>();
+                return new Log(name, provider, context, currentUser, "");
             });
         }
     }

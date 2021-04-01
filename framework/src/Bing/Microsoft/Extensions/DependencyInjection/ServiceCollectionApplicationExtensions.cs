@@ -1,4 +1,5 @@
-﻿using Bing.Core.Builders;
+﻿using Bing;
+using Bing.Core.Builders;
 using Bing.Helpers;
 using Bing.Reflection;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IBingBuilder>(builder);
 
             builder.AddCoreModule();
-
+            BingLoader.RegisterTypes(services);
             return builder;
         }
     }

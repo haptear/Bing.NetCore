@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
-using Bing.Contexts;
-using Bing.Helpers;
+using Bing.Collections;
+using Bing.DependencyInjection;
 using Bing.Logs.Abstractions;
 using Bing.Logs.Internal;
 
@@ -26,14 +26,14 @@ namespace Bing.Logs.Core
         private int _orderId;
 
         /// <summary>
-        /// 上下文
+        /// 作用域字典
         /// </summary>
-        private IContext _context;
+        private readonly ScopedDictionary _scopedDictionary;
 
         /// <summary>
         /// 日志标识
         /// </summary>
-        public string LogId => $"{GetInfo().TraceId}-{++_orderId}";
+        public string LogId => $"{GetInfo().TraceId}-{_orderId}";
 
         /// <summary>
         /// 跟踪号
@@ -65,11 +65,6 @@ namespace Bing.Logs.Core
         /// </summary>
         public string Url => GetInfo().Url;
 
-        /// <summary>
-        /// 上下文
-        /// </summary>
-        public IContext Context => _context ??= ContextFactory.Create();
-
         #endregion
 
         #region 构造函数
@@ -77,10 +72,23 @@ namespace Bing.Logs.Core
         /// <summary>
         /// 初始化一个<see cref="LogContext"/>类型的实例
         /// </summary>
-        public LogContext() => _orderId = 0;
+        /// <param name="scopedDictionary">作用域字典</param>
+        public LogContext(ScopedDictionary scopedDictionary)
+        {
+            _orderId = 0;
+            _scopedDictionary = scopedDictionary;
+        }
 
         #endregion
 
+        /// <summary>
+        /// 初始化日志标识
+        /// </summary>
+        public void InitLogId()
+        {
+            var key = "Bing.Logs.LogContext_orderId";
+            _scopedDictionary.AddOrUpdate(key, ++_orderId);
+        }
         /// <summary>
         /// 获取日志上下文信息
         /// </summary>
@@ -89,11 +97,11 @@ namespace Bing.Logs.Core
             if (_info != null)
                 return _info;
             var key = "Bing.Logs.LogContext";
-            _info = Context.Get<LogContextInfo>(key);
+            _info = _scopedDictionary.ContainsKey(key) ? _scopedDictionary[key] as LogContextInfo : null;
             if (_info != null)
                 return _info;
             _info = CreateInfo();
-            Context.Add(key, _info);
+            _scopedDictionary.AddOrUpdate(key, _info);
             return _info;
         }
 
@@ -105,20 +113,13 @@ namespace Bing.Logs.Core
             {
                 TraceId = GetTraceId(),
                 Stopwatch = GetStopwatch(),
-                Ip = Web.IP,
                 Host = Dns.GetHostName(),
-                Browser = Web.Browser,
-                Url = Web.Url,
             };
 
         /// <summary>
         /// 获取跟踪号
         /// </summary>
-        protected string GetTraceId()
-        {
-            var traceId = Context.TraceId;
-            return string.IsNullOrWhiteSpace(traceId) ? Guid.NewGuid().ToString() : traceId;
-        }
+        protected virtual string GetTraceId() => Guid.NewGuid().ToString();
 
         /// <summary>
         /// 获取计时器

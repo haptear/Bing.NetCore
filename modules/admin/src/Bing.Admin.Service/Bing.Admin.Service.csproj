@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
+    <ProjectReference Include="..\Bing.Admin.Service.Shared\Bing.Admin.Service.Shared.csproj" />
   </ItemGroup>
 
 </Project>

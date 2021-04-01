@@ -1,14 +1,13 @@
-﻿using Bing.Applications;
-using Bing.Datas.Sql;
-using Bing.Admin.Commons.Domain.Repositories;
+﻿using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Commons;
+using Bing.Data.Sql;
 
 namespace Bing.Admin.Service.Implements.Commons
 {
     /// <summary>
     /// 地区 查询服务
     /// </summary>
-    public class QueryAreaService : ServiceBase, IQueryAreaService
+    public class QueryAreaService : Bing.Application.Services.AppServiceBase, IQueryAreaService
     {
         /// <summary>
         /// Sql查询对象

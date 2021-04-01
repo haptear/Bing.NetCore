@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Bing.Admin.Service.Queries.Systems;
-using Bing.Admin.Service.Responses.Systems;
-using Bing.Applications;
-using Bing.Domains.Repositories;
+using Bing.Admin.Service.Shared.Queries.Systems;
+using Bing.Admin.Service.Shared.Responses.Systems;
+using Bing.Data;
+using Bing.Domain.Repositories;
 
 namespace Bing.Admin.Service.Abstractions.Systems
 {
     /// <summary>
     /// 管理员 查询服务
     /// </summary>
-    public interface IQueryAdministratorService : IService
+    public interface IQueryAdministratorService : Bing.Application.Services.IAppService
     {
         /// <summary>
         /// 分页查询

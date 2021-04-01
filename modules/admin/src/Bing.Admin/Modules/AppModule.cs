@@ -1,10 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Text;
+using AspectCore.Configuration;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Mvc.Filters;
 using Bing.Core.Modularity;
-using Bing.Webs.Extensions;
-using Bing.Webs.Filters;
+using Bing.DependencyInjection;
+using Bing.Domain.Entities.Events;
+using Bing.Helpers;
+using Bing.Security.Claims;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -30,22 +35,44 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
+            BingClaimTypes.UserId = IdentityModel.JwtClaimTypes.Subject;
+            BingClaimTypes.UserName = IdentityModel.JwtClaimTypes.Name;
             // 注册Mvc
-            services
-                .AddMvc(options =>
+            //services
+            //    .AddMvc(options =>
+            //    {
+            //        //options.Filters.Add<ResultHandlerAttribute>();
+            //        options.Filters.Add<ExceptionHandlerAttribute>();
+            //        //options.Filters.Add<AuditOperationAttribute>();
+            //        // 全局添加授权
+            //        options.Conventions.Add(new AuthorizeControllerModelConvention());
+            //    })
+            //    .AddNewtonsoftJson(options =>
+            //    {
+            //        options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            //    })
+            //    //.AddJsonOptions(options =>
+            //    //{
+            //    //    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            //    //})
+            //    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+            //    .AddControllersAsServices();
+            services.AddControllers(o =>
                 {
-                    //options.Filters.Add<ResultHandlerAttribute>();
-                    options.Filters.Add<ExceptionHandlerAttribute>();
-                    // 全局添加授权
-                    options.Conventions.Add(new AuthorizeControllerModelConvention());
+                    o.Conventions.Add(new AuthorizeControllerModelConvention());
                 })
-                .AddJsonOptions(options =>
+                .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddControllersAsServices();
-
+                });
+            services.EnableAop(o =>
+            {
+                o.ThrowAspectException = false;
+                o.NonAspectPredicates.AddNamespace("Bing.Swashbuckle");
+                o.NonAspectPredicates.AddNamespace("DotNetCore.CAP");
+            });
+            services.AddDomainEventDispatcher();
+            //services.AddAudit();
             return services;
         }
 
@@ -56,14 +83,20 @@ namespace Bing.Admin.Modules
         public override void UseModule(IApplicationBuilder app)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            app.UseErrorLog();
-            app.UseStaticHttpContext();
+            app.UseBingExceptionHandling();
+            // 初始化Http上下文访问器
+            Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
+            //    routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            //});
             Enabled = true;
         }
     }

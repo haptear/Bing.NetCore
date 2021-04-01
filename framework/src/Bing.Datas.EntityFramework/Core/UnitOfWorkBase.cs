@@ -2,27 +2,31 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bing.Aspects;
 using Bing.Auditing;
-using Bing.Datas.Configs;
+using Bing.Data;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Matedatas;
+using Bing.Data.Transaction;
 using Bing.Datas.EntityFramework.Logs;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Matedatas;
-using Bing.Datas.Transactions;
-using Bing.Datas.UnitOfWorks;
-using Bing.Domains.Entities;
+using Bing.DependencyInjection;
+using Bing.Domain.Entities;
+using Bing.Domain.Entities.Events;
 using Bing.Exceptions;
 using Bing.Extensions;
-using Bing.Helpers;
 using Bing.Logs;
-using Bing.Security.Extensions;
-using Bing.Sessions;
+using Bing.Uow;
+using Bing.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -60,9 +64,51 @@ namespace Bing.Datas.EntityFramework.Core
         public string TraceId { get; set; }
 
         /// <summary>
-        /// 用户会话
+        /// 服务提供程序
         /// </summary>
-        public ISession Session { get; set; }
+        [Autowired]
+        public IServiceProvider ServiceProvider { get; set; }
+
+        /// <summary>
+        /// 服务提供程序锁
+        /// </summary>
+        protected readonly object ServiceProviderLock = new object();
+
+        /// <summary>
+        /// 懒加载获取请求服务
+        /// </summary>
+        /// <typeparam name="TService">服务类型</typeparam>
+        /// <param name="reference">服务引用</param>
+        protected TService LazyGetRequiredService<TService>(ref TService reference) => LazyGetRequiredService(typeof(TService), ref reference);
+
+        /// <summary>
+        /// 懒加载获取请求服务
+        /// </summary>
+        /// <typeparam name="TRef">引用类型</typeparam>
+        /// <param name="serviceType">服务类型</param>
+        /// <param name="reference">服务引用</param>
+        protected TRef LazyGetRequiredService<TRef>(Type serviceType, ref TRef reference)
+        {
+            if (reference == null)
+            {
+                lock (ServiceProviderLock)
+                {
+                    if (reference == null)
+                        reference = (TRef)ServiceProvider.GetRequiredService(serviceType);
+                }
+            }
+            return reference;
+        }
+
+        /// <summary>
+        /// 当前用户
+        /// </summary>
+        protected ICurrentUser CurrentUser => LazyGetRequiredService(ref _currentUser);
+
+        /// <summary>
+        /// 当前用户
+        /// </summary>
+        private ICurrentUser _currentUser;
 
         #endregion
 
@@ -89,8 +135,7 @@ namespace Bing.Datas.EntityFramework.Core
         protected UnitOfWorkBase(DbContextOptions options, IServiceProvider serviceProvider) : base(options)
         {
             TraceId = Guid.NewGuid().ToString();
-            Session = Bing.Sessions.Session.Instance;
-            _serviceProvider = serviceProvider ?? Ioc.Create<IServiceProvider>();
+            _serviceProvider = serviceProvider ?? ServiceLocator.Instance.GetService<IServiceProvider>();
             RegisterToManager();
         }
 
@@ -131,12 +176,43 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="builder">配置生成器</param>
         protected void EnableLog(DbContextOptionsBuilder builder)
         {
+            ConfiguringIgnoreEvent(builder);
             var log = GetLog();
             if (IsEnabled(log) == false)
                 return;
             builder.EnableSensitiveDataLogging();
             builder.EnableDetailedErrors();
             builder.UseLoggerFactory(LoggerFactory);
+        }
+
+        /// <summary>
+        /// 配置忽略事件
+        /// </summary>
+        /// <param name="builder">配置事件</param>
+        protected virtual void ConfiguringIgnoreEvent(DbContextOptionsBuilder builder)
+        {
+            builder.ConfigureWarnings(x => x.Ignore(
+                RelationalEventId.ConnectionOpening,
+                RelationalEventId.ConnectionOpened,
+                RelationalEventId.DataReaderDisposing,
+                RelationalEventId.ConnectionClosing,
+                RelationalEventId.ConnectionClosed,
+                CoreEventId.ServiceProviderCreated,
+                CoreEventId.ServiceProviderDebugInfo,
+                CoreEventId.SensitiveDataLoggingEnabledWarning,
+                CoreEventId.ContextInitialized,
+                CoreEventId.ContextDisposed,
+                CoreEventId.QueryModelCompiling,
+                CoreEventId.QueryModelOptimized,
+                CoreEventId.QueryExecutionPlanned,
+                CoreEventId.StartedTracking,
+                CoreEventId.DetectChangesStarting,
+                CoreEventId.DetectChangesCompleted,
+                CoreEventId.SaveChangesStarting,
+                CoreEventId.PropertyChangeDetected,
+                RelationalEventId.TransactionStarted,
+                RelationalEventId.TransactionDisposed
+            ));
         }
 
         /// <summary>
@@ -180,7 +256,7 @@ namespace Bing.Datas.EntityFramework.Core
             }
             catch
             {
-                return new DataConfig() { LogLevel = DataLogLevel.Sql };
+                return new DataConfig { LogLevel = DataLogLevel.Sql };
             }
         }
 
@@ -194,7 +270,8 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="modelBuilder">映射生成器</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            foreach (var mapper in GetMaps())
+            var mappers = GetMaps();
+            foreach (var mapper in mappers)
                 mapper.Map(modelBuilder);
         }
 
@@ -241,6 +318,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
+                //var changed = ChangeTracker.Entries().Any();
+                //if (!changed)
+                //    return 0;
                 return SaveChanges();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -260,6 +340,9 @@ namespace Bing.Datas.EntityFramework.Core
         {
             try
             {
+                //var changed = ChangeTracker.Entries().Any();
+                //if (!changed)
+                //    return 0;
                 return await SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
@@ -324,21 +407,16 @@ namespace Bing.Datas.EntityFramework.Core
         /// <summary>
         /// 获取用户标识
         /// </summary>
-        protected virtual string GetUserId() => GetSession().UserId;
+        protected virtual string GetUserId() => CurrentUser.UserId;
 
         /// <summary>
         /// 获取用户名称
         /// </summary>
         protected virtual string GetUserName()
         {
-            var name = GetSession().GetFullName();
-            return string.IsNullOrEmpty(name) ? GetSession().GetUserName() : name;
+            var name = CurrentUser.GetFullName();
+            return string.IsNullOrEmpty(name) ? CurrentUser.GetUserName() : name;
         }
-
-        /// <summary>
-        /// 获取用户会话
-        /// </summary>
-        protected virtual ISession GetSession() => Session;
 
         /// <summary>
         /// 初始化修改审计信息
@@ -368,6 +446,7 @@ namespace Bing.Datas.EntityFramework.Core
         /// <param name="cancellationToken">取消令牌</param>
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            await DomainEventHandleAsync();
             SaveChangesBefore();
             var transactionActionManager = Create<ITransactionActionManager>();
             if (transactionActionManager.Count == 0)
@@ -400,6 +479,38 @@ namespace Bing.Datas.EntityFramework.Core
                 transaction.Rollback();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// 领域事件处理
+        /// </summary>
+        protected virtual async Task DomainEventHandleAsync()
+        {
+            var dispatcher = Create<IDomainEventDispatcher>();
+            if (dispatcher != null)
+            {
+                var domainEvents = GetDomainEvents();
+                foreach (var @event in domainEvents) 
+                    await dispatcher.DispatchAsync(@event);
+            }
+        }
+
+        /// <summary>
+        /// 获取领域事件集合
+        /// </summary>
+        private IEnumerable<DomainEvent> GetDomainEvents()
+        {
+            var domainEvents = new List<DomainEvent>();
+            foreach (var aggregateRoot in ChangeTracker.Entries<IAggregateRoot>())
+            {
+                var events = aggregateRoot.Entity.GetDomainEvents();
+                if (events != null && events.Any())
+                {
+                    domainEvents.AddRange(events);
+                    aggregateRoot.Entity.ClearDomainEvents();
+                }
+            }
+            return domainEvents;
         }
 
         #endregion

@@ -1,9 +1,9 @@
 ﻿using System;
-using Bing.Datas.Sql;
-using Bing.Datas.Sql.Builders;
-using Bing.Datas.Sql.Builders.Clauses;
-using Bing.Datas.Sql.Builders.Core;
-using Bing.Datas.Sql.Matedatas;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Matedatas;
 
 namespace Bing.Datas.Dapper.Oracle
 {
@@ -35,9 +35,6 @@ namespace Bing.Datas.Dapper.Oracle
         /// <param name="schema">架构名</param>
         /// <param name="alias">别名</param>
         /// <param name="type">类型</param>
-        protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null)
-        {
-            return new JoinItem(joinType, table, schema, alias, false, false, type);
-        }
+        protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) => new JoinItem(joinType, table, schema, alias, false, false, type);
     }
 }

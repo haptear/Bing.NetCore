@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -9,19 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.MySql" Version="2.6.0" />
-    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="2.6.0" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="3.1.1" />
+    <PackageReference Include="IdentityModel" Version="3.10.10" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bing.Utils.Http" Version="1.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\components\src\Bing.Biz\Bing.Biz.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Biz\Bing.Biz.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.Exceptionless\Bing.Logs.Exceptionless.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logs.NLog\Bing.Logs.NLog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Permissions\Bing.Permissions.csproj" />
-    <ProjectReference Include="..\..\..\..\framework\src\Bing.Webs\Bing.Webs.csproj" />
   </ItemGroup>
 
 </Project>

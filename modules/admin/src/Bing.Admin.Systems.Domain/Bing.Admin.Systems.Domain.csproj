@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +34,15 @@
     </Compile>
     <Compile Update="Models/UserRole.*.cs">
       <DependentUpon>UserRole.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Models/Module.*.cs">
+      <DependentUpon>Module.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Models/Operation.*.cs">
+      <DependentUpon>Operation.cs</DependentUpon>
     </Compile>
   </ItemGroup>
 

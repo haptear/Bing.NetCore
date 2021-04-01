@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using Bing.Domains.Entities;
+using Bing.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -19,8 +19,15 @@ namespace Bing.Datas.EntityFramework.Extensions
         public static ModelBuilder SetSimpleUnderscoreTableNameConvention(this ModelBuilder modelBuilder)
         {
             var underscoreRegex = new Regex(@"((?<=.)[A-Z][a-zA-Z]*)|((?<=[a-zA-Z])\d+)");
+//#if NETSTANDARD
+//            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+//                entity.Relational().TableName = underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower();
+//#else
+//            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+//                entity.SetTableName(underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower());
+//#endif
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
-                entity.Relational().TableName = underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower();
+                entity.SetTableName(underscoreRegex.Replace(entity.DisplayName(), @"$1$2").ToLower());
             return modelBuilder;
         }
 
@@ -41,7 +48,7 @@ namespace Bing.Datas.EntityFramework.Extensions
         /// <param name="modelBuilder">实体生成器</param>
         public static ModelBuilder HasGlobalDeleteQueryFilter(this ModelBuilder modelBuilder)
         {
-            modelBuilder.Model.GetEntityTypes().Where(entityType => typeof(IDelete).IsAssignableFrom(entityType.ClrType))
+            modelBuilder.Model.GetEntityTypes().Where(entityType => typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
                 .ToList().ForEach(x =>
                 {
                     modelBuilder.Entity(x.ClrType).Property<bool>("IsDeleted");

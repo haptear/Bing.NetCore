@@ -5,14 +5,13 @@ using Bing.Admin.Commons.Domain.Models;
 using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Data;
 using Bing.Admin.Service.Abstractions;
-using Bing.Applications;
 
 namespace Bing.Admin.Service.Implements
 {
     /// <summary>
     /// 测试服务
     /// </summary>
-    public class TestService : ServiceBase, ITestService
+    public class TestService : Bing.Application.Services.AppServiceBase, ITestService
     {
         /// <summary>
         /// 工作单元
@@ -60,6 +59,15 @@ namespace Bing.Admin.Service.Implements
 
             await FileRepository.AddAsync(list);
             await UnitOfWork.CommitAsync();
+        }
+
+        /// <summary>
+        /// 测试参数空异常
+        /// </summary>
+        public Task TestArgumentNullAsync(List<string> list)
+        {
+            list.ForEach(Console.WriteLine);
+            return Task.CompletedTask;
         }
     }
 }

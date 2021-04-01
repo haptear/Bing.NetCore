@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using Bing.Datas.Configs;
+using Bing.Data;
 using Bing.Datas.EntityFramework.Core;
-using Bing.Datas.UnitOfWorks;
+using Bing.DependencyInjection;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Logs;
+using Bing.Uow;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -38,13 +39,15 @@ namespace Bing.Datas.EntityFramework.Logs
         {
             var config = GetConfig();
             var log = GetLog();
-            if (IsEnabled(eventId, config) == false)
+            if (IsEnabled(eventId, config, exception) == false)
                 return;
-            log.Caption($"执行EF操作：")
+            if (!string.IsNullOrWhiteSpace(GetUnitOfWork().TraceId))
+                log.Tag(GetUnitOfWork()?.TraceId);
+            log
+                .Caption($"执行EF操作：")
                 .Content($"工作单元跟踪号：{GetUnitOfWork()?.TraceId}")
                 .Content($"事件ID：{eventId.Id}")
                 .Content($"事件名称：{eventId.Name}");
-            Debug.WriteLine(state);
             AddContent(state, config, log);
             log.Exception(exception).Trace();
         }
@@ -56,7 +59,7 @@ namespace Bing.Datas.EntityFramework.Logs
         {
             try
             {
-                var options = Ioc.Create<IOptionsSnapshot<DataConfig>>();
+                var options = ServiceLocator.Instance.GetService<IOptionsSnapshot<DataConfig>>();
                 return options.Value;
             }
             catch
@@ -87,7 +90,7 @@ namespace Bing.Datas.EntityFramework.Logs
         {
             try
             {
-                var unitOfWork = Ioc.Create<IUnitOfWork>();
+                var unitOfWork = ServiceLocator.Instance.GetService<IUnitOfWork>();
                 return unitOfWork as UnitOfWorkBase;
             }
             catch
@@ -101,13 +104,16 @@ namespace Bing.Datas.EntityFramework.Logs
         /// </summary>
         /// <param name="eventId">事件ID</param>
         /// <param name="config">数据配置</param>
-        private bool IsEnabled(EventId eventId, DataConfig config)
+        /// <param name="exception">异常</param>
+        private bool IsEnabled(EventId eventId, DataConfig config, Exception exception)
         {
             if (config.LogLevel == DataLogLevel.Off)
                 return false;
             if (config.LogLevel == DataLogLevel.All)
                 return true;
-            if (eventId.Name == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted")
+            if (eventId == RelationalEventId.CommandExecuted)
+                return true;
+            if (exception != null && eventId == RelationalEventId.CommandError)
                 return true;
             return false;
         }

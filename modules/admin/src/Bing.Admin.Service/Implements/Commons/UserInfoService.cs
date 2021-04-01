@@ -1,5 +1,4 @@
-using Bing.Applications;
-using Bing.Admin.Data;
+﻿using Bing.Admin.Data;
 using Bing.Admin.Commons.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Commons;
 
@@ -8,7 +7,7 @@ namespace Bing.Admin.Service.Implements.Commons
     /// <summary>
     /// 用户信息 服务
     /// </summary>
-    public class UserInfoService : ServiceBase, IUserInfoService
+    public class UserInfoService : Bing.Application.Services.AppServiceBase, IUserInfoService
     {
         /// <summary>
         /// 工作单元

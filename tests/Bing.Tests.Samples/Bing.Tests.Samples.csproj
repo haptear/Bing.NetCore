@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Bing.Applications\Bing.Applications.csproj" />
-    <ProjectReference Include="..\..\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.AutoMapper\Bing.AutoMapper.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Ddd.Application\Bing.Ddd.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +25,11 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>TestResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Extensions.Configuration.Json" Version="3.1.10" />
+    <PackageReference Update="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.10" />
   </ItemGroup>
 
 </Project>

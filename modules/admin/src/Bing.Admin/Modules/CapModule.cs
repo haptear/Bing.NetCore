@@ -1,12 +1,16 @@
 ﻿using System.ComponentModel;
+using Bing.Admin.Data;
 using Bing.Admin.Data.UnitOfWorks.MySql;
+using Bing.Admin.EventHandlers.Abstractions;
 using Bing.Admin.EventHandlers.Abstractions.Systems;
+using Bing.Admin.EventHandlers.Implements;
 using Bing.Admin.EventHandlers.Implements.Systems;
-using Bing.Admin.Infrastructure.Cap;
 using Bing.AspNetCore;
 using Bing.Core.Modularity;
 using Bing.Events.Cap;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Internal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules
@@ -41,6 +45,7 @@ namespace Bing.Admin.Modules
             services.AddCapEventBus(o =>
             {
                 o.UseEntityFramework<AdminUnitOfWork>();
+                //o.UseMySql(connection);
                 o.UseDashboard();
                 // 设置处理成功的数据在数据库中保存的时间（秒），为保证系统性能，数据会定期清理
                 o.SucceedMessageExpiredAfter = 24 * 3600;
@@ -50,7 +55,7 @@ namespace Bing.Admin.Modules
                 o.UseRabbitMQ(x =>
                 {
                     x.UserName = "admin";
-                    x.Password = "";
+                    x.Password = "bing2019.00";
                     x.HostName = "10.186.132.60";
                 });
             });
@@ -64,6 +69,7 @@ namespace Bing.Admin.Modules
         protected void LoadEvent(IServiceCollection services)
         {
             services.AddTransient<IUserLoginLogMessageEventHandler, UserLoginLogMessageEventHandler>();
+            services.AddTransient<ITestMessageEventHandler, TestMessageEventHandler>();
         }
     }
 }

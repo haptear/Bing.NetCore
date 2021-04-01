@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Bing.Admin.Commons.Domain.Models;
-using Bing.Applications;
-using Bing.Datas.Sql;
 using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
-using Bing.Admin.Service.Queries.Systems;
-using Bing.Admin.Service.Responses.Systems;
+using Bing.Admin.Service.Shared.Queries.Systems;
+using Bing.Admin.Service.Shared.Responses.Systems;
 using Bing.Admin.Systems.Domain.Models;
-using Bing.Domains.Repositories;
+using Bing.Data;
+using Bing.Data.Sql;
 using Bing.Extensions;
 using Bing.Helpers;
 
@@ -19,7 +19,7 @@ namespace Bing.Admin.Service.Implements.Systems
     /// <summary>
     /// 管理员 查询服务
     /// </summary>
-    public class QueryAdministratorService : ServiceBase, IQueryAdministratorService
+    public class QueryAdministratorService : Bing.Application.Services.AppServiceBase, IQueryAdministratorService
     {
         /// <summary>
         /// Sql查询对象
@@ -30,13 +30,14 @@ namespace Bing.Admin.Service.Implements.Systems
         /// 管理员仓储
         /// </summary>
         protected IAdministratorRepository AdministratorRepository { get; set; }
-    
+
         /// <summary>
         /// 初始化一个<see cref="QueryAdministratorService"/>类型的实例
         /// </summary>
         /// <param name="sqlQuery">Sql查询对象</param>
         /// <param name="administratorRepository">管理员仓储</param>
-        public QueryAdministratorService( ISqlQuery sqlQuery, IAdministratorRepository administratorRepository )
+        public QueryAdministratorService( ISqlQuery sqlQuery
+            , IAdministratorRepository administratorRepository)
         {
             SqlQuery = sqlQuery;
             AdministratorRepository = administratorRepository;
@@ -50,6 +51,7 @@ namespace Bing.Admin.Service.Implements.Systems
         {
             if (parameter == null)
                 return new PagerList<AdministratorResponse>();
+            Debug.WriteLine($"当前用户: {CurrentUser.UserId}, {CurrentUser.UserName}");
             var query = SqlQuery
                 .Select<User>(
                     x => new object[] { x.Id, x.Nickname, x.UserName, x.LastModificationTime, x.LastModifier },

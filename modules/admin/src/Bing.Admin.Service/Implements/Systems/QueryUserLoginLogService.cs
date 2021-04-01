@@ -1,14 +1,13 @@
-﻿using Bing.Applications;
-using Bing.Datas.Sql;
-using Bing.Admin.Systems.Domain.Repositories;
+﻿using Bing.Admin.Systems.Domain.Repositories;
 using Bing.Admin.Service.Abstractions.Systems;
+using Bing.Data.Sql;
 
 namespace Bing.Admin.Service.Implements.Systems
 {
     /// <summary>
     /// 用户登录日志 查询服务
     /// </summary>
-    public class QueryUserLoginLogService : ServiceBase, IQueryUserLoginLogService
+    public class QueryUserLoginLogService : Bing.Application.Services.AppServiceBase, IQueryUserLoginLogService
     {
         /// <summary>
         /// Sql查询对象
